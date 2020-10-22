@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace FileManager
 {
-    abstract class Rule : IRule
+    abstract class Rule : ISoftRule
     {
         private readonly string targetDir;
 
@@ -18,7 +18,7 @@ namespace FileManager
 
         public bool IsAppliable(FileInfo file)
         {
-            return GetExtension().Contains(file.Extension);
+            return File.Exists(file.FullName) && GetExtension().Contains(file.Extension);
         }
 
         public virtual void Execute(FileInfo file)

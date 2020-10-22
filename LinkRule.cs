@@ -4,7 +4,11 @@ using System.Linq;
 
 namespace FileManager
 {
-    class LinkRule : IRule
+    /// <summary>
+    /// Remove link from the soft directories, the link rule mark as soft on purpose
+    /// because you can create a new link at any time 
+    /// </summary>
+    class LinkRule : ISoftRule
     {
         private IEnumerable<string> GetExtension()
         {

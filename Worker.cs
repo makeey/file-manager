@@ -7,25 +7,33 @@ namespace FileManager
 {
     public class Worker : BackgroundService
     {
-        private readonly string[] targetDirectories;
+        private readonly string[] softDirectories;
+        private readonly string[] hardDirectories;
         private readonly FileCleanUpService cleanUpService;
         public Worker(HostBuilderContext targetPath)
         {
-            targetDirectories = targetPath.Configuration.GetSection("Application:TargetDir").Get<string[]>();
+            softDirectories = targetPath.Configuration.GetSection("Application:SoftDirs").Get<string[]>();
+            hardDirectories = targetPath.Configuration.GetSection("Application:HardDirs").Get<string[]>();
             cleanUpService = new FileCleanUpService(
-            new IRule[]
+            new ISoftRule[]
             {
                 new DocumentRule(targetPath.Configuration.GetSection("Application:DocumentsDir").Value),
                 new ImageRule(targetPath.Configuration.GetSection("Application:ImagesDir").Value),
                 new LinkRule(),
-            });
+            },
+            new IHardRule[]
+            {
+                new DeleteUntouchedFilesFromDownloadFolderRule()
+            }
+            );
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                cleanUpService.CleanUp(targetDirectories);
+                cleanUpService.SoftCleanUp(softDirectories);
+                cleanUpService.HardCleanUp(hardDirectories);
                 await Task.Delay(3600, stoppingToken);
             }
         }
